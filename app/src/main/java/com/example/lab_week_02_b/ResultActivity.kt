@@ -1,12 +1,14 @@
 package com.example.lab_week_02_b
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import android.app.Activity
-import android.content.Intent
+
 
 class ResultActivity : AppCompatActivity() {
     companion object {
@@ -21,22 +23,31 @@ class ResultActivity : AppCompatActivity() {
         val colorCode = intent.getStringExtra(COLOR_KEY)
         val backgroundScreen = findViewById<ConstraintLayout>(R.id.background_screen)
         val resultMessage = findViewById<TextView>(R.id.color_code_result_message)
+        val backButton = findViewById<Button>(R.id.back_button)
 
-        if (!colorCode.isNullOrEmpty()) {
-            try {
-                backgroundScreen.setBackgroundColor(Color.parseColor("#$colorCode"))
-                resultMessage.text = getString(
-                    R.string.color_code_result_message,
-                    colorCode.uppercase()
-                )
-            } catch (ex: IllegalArgumentException) {
-                // Send error back to MainActivity
-                val errorIntent = Intent().apply {
-                    putExtra(ERROR_KEY, true)
-                }
-                setResult(Activity.RESULT_OK, errorIntent)
-                finish()
-            }
+        if (colorCode.isNullOrEmpty()) {
+            // Handle empty input safely
+            val errorIntent = Intent().apply { putExtra(ERROR_KEY, true) }
+            setResult(Activity.RESULT_OK, errorIntent)
+            finish()
+            return
         }
+
+        try {
+            backgroundScreen?.setBackgroundColor(Color.parseColor("#$colorCode"))
+            resultMessage?.text = getString(
+                R.string.color_code_result_message,
+                colorCode.uppercase()
+            )
+        } catch (ex: IllegalArgumentException) {
+            // Invalid hex input → report error
+            val errorIntent = Intent().apply { putExtra(ERROR_KEY, true) }
+            setResult(Activity.RESULT_OK, errorIntent)
+            finish()
+            return
+        }
+
+        // Back button → go back to MainActivity
+        backButton?.setOnClickListener { finish() }
     }
 }
